@@ -37,7 +37,7 @@ jobs:
           # scp参数
           ARGS: "-avzr --delete"
           # 源目录，编译后生成的文件目录
-          SOURCE: "./docs/.vitepress/dist"
+          SOURCE: "./docs/.vitepress/dist/"
           # 服务器ip：换成你的服务器IP
           REMOTE_HOST: "120.25.159.52"
           # 用户
