@@ -3,8 +3,8 @@ on:
   #监听push操作
   push:
     branches:
-      # master分支，你也可以改成其他分支
-      - master
+      # main分支，你也可以改成其他分支
+      - main
 jobs:
   build:
     # runs-on 指定job任务运行所需要的虚拟机环境(必填字段)
@@ -13,7 +13,7 @@ jobs:
       # 获取源码
       - name: Checkout
         # 使用action库  actions/checkout获取源码
-        uses: actions/checkout@master
+        uses: actions/checkout@main
       # 安装Node
       - name: use Node.js 16.13.1
         # 使用action库  actions/setup-node安装node
