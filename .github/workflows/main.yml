@@ -30,16 +30,17 @@ jobs:
         run: npm run docs:build
       # 部署到阿里云
       - name: Deploy to Aliyun
-        uses: garygrossgarten/github-action-scp@release
+        uses: easingthemes/ssh-deploy@v2.1.1
         env:
           # 私钥
-          privateKey: ${{ secrets.ACCESS_KEY_SECRET }}
+          SSH_PRIVATE_KEY: ${{ secrets.ACCESS_KEY_SECRET }}
+          # scp参数
+          ARGS: "-avzr --delete"
           # 源目录，编译后生成的文件目录
-          local: "./docs/.vitepress/dist"
+          SOURCE: "./docs/.vitepress/dist"
           # 服务器ip：换成你的服务器IP
-          host: "120.25.159.52"
-          port: "22"
+          REMOTE_HOST: "120.25.159.52"
           # 用户
-          username: "root"
+          REMOTE_USER: "root"
           # 目标地址 你在服务器上部署代码的地方
-          remote: "/home/html/note"
+          TARGET: "/home/html/note"
