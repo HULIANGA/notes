@@ -11,10 +11,24 @@ module.exports = {
         //   头部导航
         nav: [
             { text: '首页', link: '/' },
-            { text: '微前端', link: '/micro-frontend/' },
+            { text: '找工作', link: '/find-work/' },
+            { text: '微前端', link: '/micro-frontend/' }
         ],
         //   侧边导航
         sidebar: [
+            {
+                text: '找工作', link: '/find-work/', children: [
+                    {
+                        text: '知识概念', link: '/find-work/concept/'
+                    },
+                    {
+                        text: '代码和算法', link: '/find-work/code/'
+                    },
+                    {
+                        text: '项目管理', link: '/find-work/manage/'
+                    }
+                ]
+            },
             {
                 text: '微前端', link: '/micro-frontend/', children: [
                     {
