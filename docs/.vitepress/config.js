@@ -19,7 +19,7 @@ module.exports = {
             {
                 text: '找工作', link: '/find-work/', children: [
                     {
-                        text: '知识概念', link: '/find-work/concept/'
+                        text: '基础知识', link: '/find-work/concept/'
                     },
                     {
                         text: '代码和算法', link: '/find-work/code/'

@@ -1,5 +1,74 @@
-## this
+## 原型
+JavaScript 是基于原型的语言。
 
+- 每个函数都有 `prototype` 属性。
+- 每个对象都有 `__proto__` 属性，指向这个对象的构造函数的 `prototype` 属性。
+- `prototype` 也是一个对象，也有 `__proto__` 属性，指向 `Object.prototype`，`Object.prototype` 的 `__proto__` 是 `null`。
+- `prototype` 还有一个 `constructor` 属性，指向构造函数本身。
+- 关系如下图所示：
+    ![image.png](./prototype.png)
+- `Object.create()` 方法创建一个新对象，使用现有的对象来提供新创建的对象的 `__proto__`。通过这个方法来继承
+
+## 原型链
+当获取一个对象的属性时，会先从对象本身寻找，如果没有再到对象的 `__proto__` 寻找，还没有就再到对象的 `__proto__` 的 `__proto__` 寻找，直到 `Object.prototype`。
+
+## 继承
+### 通过原型链继承
+1. 定义一个父类，添加属性和方法
+    ``` javascript
+    function Person (name, age) {
+        this.name = name
+        this.age = age
+    }
+    Person.prototype.sayHi = function () {
+        console.log(`Hi, i'm ${this.name}.`)
+    }
+    ```
+2. 定义子类，在子类的构造函数里调用父类构造函数，添加自己的属性，添加自己的方法或重写方法
+    ``` javascript
+    function Teacher (name, age, subject) {
+        Person.call(this, name, age)
+
+        this.subject = subject
+    }
+    Person.prototype.sayHi = function () {
+        console.log(`Hi, i'm ${this.name}, i'm ${this.subject} teacher.`)
+    }
+    ```
+3. 将子类的 `prototype.__proto__` 指向父类的 `prototype` 
+    ```js{8}
+    function Teacher (name, age, subject) {
+        Person.call(this, name, age)
+
+        this.subject = subject
+    }
+
+    // `Object.create()` 方法创建一个新对象，使用现有的对象来提供新创建的对象的 `__proto__`。通过这个方法来继承
+    Teacher.prototype = Object.create(Person.prototype)
+
+    Person.prototype.sayHi = function () {
+        console.log(`Hi, i'm ${this.name}, i'm ${this.subject} teacher.`)
+    }
+    ```
+4. 上面一步操作后，子类的 `prototype.constructor` 将会指向父类的构造函数，需要修改为子类构造函数
+    ```js{9}
+    function Teacher (name, age, subject) {
+        Person.call(this, name, age)
+
+        this.subject = subject
+    }
+
+    // `Object.create()` 方法创建一个新对象，使用现有的对象来提供新创建的对象的 `__proto__`。通过这个方法来继承
+    Teacher.prototype = Object.create(Person.prototype)
+    Teacher.prototype.constructor = Teacher
+
+    Person.prototype.sayHi = function () {
+        console.log(`Hi, i'm ${this.name}, i'm ${this.subject} teacher.`)
+    }
+    ```
+### 几种继承的区别
+https://github.com/mqyqingfeng/Blog/issues/16
+## this
 ### this指向
 - 在全局环境中 this 指向全局对象
     - 浏览器中是 window
@@ -178,37 +247,21 @@ console.log(obj2 instanceof func2) // true
 3. 第三步，支持 new
     ``` javascript
     Function.prototype.myBind = function (thisArg, ...arg) {
-        var that = this
-        var newFunc = function () {
-            return that.apply(this instanceof newFunc ? this : thisArg, arg.concat([...arguments]))
-        }
-        newFunc.prototype = this.prototype
-        return newFunc
-    }
-    ```
-    - `this instanceof newFunc` 区分是普通函数调用还是构造函数调用
-    - `newFunc.prototype = this.prototype` 让新函数继承原函数
-
-4. 优化
-    ``` javascript
-    Function.prototype.myBind = function (thisArg, ...arg) {
         if (typeof this !== "function") {
             throw new Error("Function.prototype.bind - what is trying to be bound is not callable");
         }
 
         var that = this
-
-        var nullFunc = function () {};
         var newFunc = function () {
             return that.apply(this instanceof newFunc ? this : thisArg, arg.concat([...arguments]))
         }
-        nullFunc.prototype = this.prototype;
-        newFunc.prototype = new nullFunc();
+        newFunc.prototype = Object.create(this.prototype)
         return newFunc
     }
     ```
     - 如果不是函数调用 bind，抛出错误
-    - 添加一个空函数来中转，防止修改 `newFunc.prototype` 的时候也会修改原函数的 prototype
+    - `this instanceof newFunc` 区分是普通函数调用还是构造函数调用
+    - 使用 `Object.create` 让新函数继承原函数
 
 **不借助 call 或 apply 实现 bind**
 
@@ -239,6 +292,55 @@ Function.prototype.myApply = function (thisArg, arg) {
 }
 ```
 
-## 继承
+## 事件循环
+宏任务和微任务：
+- 宏任务：**script全部代码**、setTimeout、setInterval、setImmediate（只有IE10支持）、I/O、UI Rendering。
+- 微任务：Process.nextTick（Node独有）、Promise、Object.observe(废弃)、MutationObserver
+### 浏览器环境
+有一个**主线程**和**调用栈**，所有的任务都会被放到调用栈中等待主线程执行。
 
+同步任务会在调用栈中被主线程依次执行，异步任务会在**有了结果后将回调函数放入任务队列**，微任务放到微任务队列，宏任务放到宏任务队列。当调用栈空了之后会按顺序把微任务放入调用栈执行，当微任务队列空了之后会按顺序把宏任务放入调用栈执行，如此循环。
+### node环境
+https://zhuanlan.zhihu.com/p/54882306
+
+## js异步
+### Promise
+### Generate
+### async/await
 ## new
+https://github.com/mqyqingfeng/Blog/issues/13
+## 闭包
+
+## 正则
+
+## event
+### event 类 on once 等方法
+### 点击table的td显示td内容
+
+## 类型转换
+
+## http
+### http 握手原理
+### http 的方法有哪几种，每个方法的用途
+### https 获取加密密钥的过程
+### http 请求都包含哪些字段
+### http 请求幂等性
+
+## 跨域
+
+## 前端控制请求并发 
+
+## 回流重绘
+
+## canvas
+
+## cookie
+## vue
+### diff原理
+
+## html
+### meta标签
+## css
+### 上中下布局
+### bfc 块级格式化上下文
+### <link/>为什么要放在头部
