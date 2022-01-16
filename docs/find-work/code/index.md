@@ -64,6 +64,45 @@ https://github.com/mqyqingfeng/Blog/issues/42
 
 ## 最长子序列
 
+## 实现以下promisify方法
+``` js
+function delayToEcho(msg, cb) {
+    setTimeout(() => {
+        const err = Date.now() % 2 === 0 ? null : new Error();
+        cb(err, msg);
+    }, 3000);
+}
+
+
+// 正常调用
+delayToEcho("msg", (err, msg) => {});
+  
+  
+function promisify(fn) {
+    // 请把这个函数实现，能够让以下代码能够成功运行
+    return function (msg) {
+        return new Promise((reslove, reject) => {
+            fn.call(this, msg, function (err, m) {
+                if (err) {
+                    reject(err)
+                } else {
+                    reslove(m)
+                }
+            })
+        })
+    }
+}
+  
+  
+promisify(delayToEcho)("msg")
+.then((msg) => {
+    console.log(msg);
+})
+.catch((err) => {
+    console.log(err);
+});
+```
+
 ## 二叉树中序遍历
 ## throttle节流
 n秒内只执行一次
