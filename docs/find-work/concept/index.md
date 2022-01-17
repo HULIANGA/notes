@@ -68,6 +68,9 @@ JavaScript 是基于原型的语言。
     ```
 ### 几种继承的区别
 https://github.com/mqyqingfeng/Blog/issues/16
+
+## Class
+
 ## this
 ### this指向
 - 在全局环境中 this 指向全局对象
@@ -485,6 +488,9 @@ HTTPS （安全的HTTP）是 HTTP 协议的加密版本。它通常使用 SSL (e
 
 ## cookie
 ## vue
+### MVVM如何实现
+### 双向绑定原理
+### 组合式api实现原理
 ### vue3 对比 vue2
 - 组合式API
 - Teleport
@@ -509,6 +515,7 @@ HTTPS （安全的HTTP）是 HTTP 协议的加密版本。它通常使用 SSL (e
 Vue 在更新 DOM 时是异步执行的。只要侦听到数据变化，Vue 将开启一个队列，并缓冲在同一事件循环中发生的所有数据变更。如果同一个 watcher 被多次触发，只会被推入到队列中一次。这种在缓冲时去除重复数据对于避免不必要的计算和 DOM 操作是非常重要的。然后，在下一个的事件循环“tick”中，Vue 刷新队列并执行实际 (已去重的) 工作。Vue 在内部对异步队列尝试使用原生的 Promise.then、MutationObserver 和 setImmediate，如果执行环境不支持，则会采用 setTimeout(fn, 0) 代替。
 ### diff原理
 https://zhuanlan.zhihu.com/p/149972619
+
 https://zhuanlan.zhihu.com/p/369557715
 
 ## webpack
