@@ -292,6 +292,14 @@ Function.prototype.myApply = function (thisArg, arg) {
 }
 ```
 
+## 数据类型
+- JS拥有动态类型，相同变量可⽤作不同类型
+- typeof返回string、number、boolean、object、function、symbol、undefined
+- typeof数组返回object，typeof null 返回object
+- undefined、空值、null。没有值的变量是undefined、空值是空字符串、null == undefined返回true、null === undefined返回false
+- instanceof可以检测Array类型。object(要检测的对象) instanceof constructor(某个构造函数)，instanceof⽤来检测
+- constructor.prototype是否存在于object的原型链上
+- Object.prototype.toString.call(obj)
 ## 事件循环
 宏任务和微任务：
 - 宏任务：**script全部代码**、setTimeout、setInterval、setImmediate（只有IE10支持）、I/O、UI Rendering。
@@ -347,7 +355,12 @@ https://github.com/mqyqingfeng/Blog/issues/13
 ## 类型转换
 
 ## http
-### http 握手原理
+### http 握手
+1. 客户端发送syn包(syn=j)到服务器，并进入SYN_SEND状态，等待服务器确认；
+2. 服务器收到syn包，必须确认客户的SYN（ack=j+1），同时自己也发送一个SYN包（syn=k），即SYN+ACK包，此时服务器进入SYN_RECV状态；
+3. 客户端收到服务器的SYN＋ACK包，向服务器发送确认包ACK(ack=k+1)，此包发送完毕，客户端和服务器进入ESTABLISHED状态，完成三次握手。
+
+![image](./http.jpg)
 ### http 状态码
 https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status
 
@@ -451,12 +464,20 @@ HTTP 帧现在对 Web 开发人员是透明的。在 HTTP/2 中，这是一个�
 
 ![image](./Binary_framing2.png)
 
-### https 获取加密密钥的过程
+### https
 HTTPS （安全的HTTP）是 HTTP 协议的加密版本。它通常使用 SSL (en-US) 或者 TLS 来加密客户端和服务器之间所有的通信 。这安全的链接允许客户端与服务器安全地交换敏感的数据。
 
-## 跨域
+采用HTTPS协议的服务器必须要有一套数字证书，可以是自己制作或者CA证书。区别就是自己颁发的证书需要客户端验证通过，才可以继续访问，而使用CA证书则不会弹出提示页面。这套证书其实就是一对公钥和私钥。公钥给别人加密使用，私钥给自己解密使用。
 
-## 前端控制请求并发 
+### https 握手
+1. 客户端发起https请求，服务端收到请求后把证书公钥返回。
+2. 客户端收到证书信息后验证证书是否有效，无效则通知客户端需要用户手动验证通过。验证通过后生成一个随机值使用证书公钥加密后发送给服务端。
+3. 服务端将收到的随机数解密，再使用这个随机数加密需要返回的信息。
+4. 客户端解密信息。
+
+![image](./https.png)
+
+## 跨域
 
 ## 回流重绘
 
@@ -464,13 +485,89 @@ HTTPS （安全的HTTP）是 HTTP 协议的加密版本。它通常使用 SSL (e
 
 ## cookie
 ## vue
+### vue3 对比 vue2
+- 组合式API
+- Teleport
+- 组件支持多个根节点
+- 使用 `createApp` 创建实例，原本在Vue上的全局api也转移到了实例上
+- 全局api使用具名导出的方式，支持tree-shaking
+- v-model 语法变更
+- key
+    - 对于 v-if/v-else/v-else-if 的各分支项 key 将不再是必须的，因为现在 Vue 会自动生成唯一的 key。
+    - `<template v-for>` 的 key 应该设置在 `<template>` 标签上
+- 两者作用于同一个元素上时，v-if 会拥有比 v-for 更高的优先级。
+- 一个元素同时定义了 `v-bind="object"` 和一个相同的独立 attribute，那么绑定的声明顺序将决定它们如何被合并
+- `v-on` 的 `.native` 修饰符已被移除，组件件事件现在需要在 `emits` 选项中声明
+- `v-for` 中的 ref 不再注册 ref 数组
+- 异步组件现在需要使用 defineAsyncComponent 方法来创建
+- 使用 `Proxy` 代替 `Object.defineProperty`，`Object.defineProperty` 有以下缺点：
+    - 通过下标的方式直接修改属性的值，或者添加一个预先不存在的属性，是无法监听到数据变化的
+    - 需要对每个对象的属性进行遍历，如果，属性值是对象，还需要深度遍历
+- 新增了静态标记，对于标记了静态标记的标签，diff时不再对比
+- 绑定的方法会被缓存起来，下次更新直接复用
+### 异步渲染
+Vue 在更新 DOM 时是异步执行的。只要侦听到数据变化，Vue 将开启一个队列，并缓冲在同一事件循环中发生的所有数据变更。如果同一个 watcher 被多次触发，只会被推入到队列中一次。这种在缓冲时去除重复数据对于避免不必要的计算和 DOM 操作是非常重要的。然后，在下一个的事件循环“tick”中，Vue 刷新队列并执行实际 (已去重的) 工作。Vue 在内部对异步队列尝试使用原生的 Promise.then、MutationObserver 和 setImmediate，如果执行环境不支持，则会采用 setTimeout(fn, 0) 代替。
 ### diff原理
+https://zhuanlan.zhihu.com/p/149972619
+https://zhuanlan.zhihu.com/p/369557715
 
 ## webpack
+### webpack 打包原理
+webpack 是一个现代 JavaScript 应用程序的静态模块打包器(module bundler)。当 webpack 处理应用程序时，它会递归地构建一个依赖关系图(dependency graph)，其中包含应用程序需要的每个模块，然后将所有这些模块打包成一个或多个 bundle。
+### webpack 核心概念
+1. entry。入口起点(entry point)指示 webpack 应该使用哪个模块，来作为构建其内部依赖图的开始。进入入口起点后，webpack 会找出有哪些模块和库是入口起点（直接和间接）依赖的。
+2. output。output 属性告诉 webpack 在哪里输出它所创建的 bundles，以及如何命名这些文件，默认值为 ./dist。基本上，整个应用程序结构，都会被编译到你指定的输出路径的文件夹中。
+3. loader。loader 让 webpack 能够去处理那些非 JavaScript 文件（webpack 自身只理解 JavaScript）。loader 可以将所有类型的文件转换为 webpack 能够处理的有效模块，然后你就可以利用 webpack 的打包能力，对它们进行处理。
+4. plugin。loader 被用于转换某些类型的模块，而插件则可以用于执行范围更广的任务。插件的范围包括，从打包优化和压缩，一直到重新定义环境中的变量。插件接口功能极其强大，可以用来处理各种各样的任务。
+
+### webpack5
+https://webpack.docschina.org/blog/2020-10-10-webpack-5-release/
+
+这个版本的重点在于以下几点。
+- 尝试用持久性缓存来提高构建性能。
+- 尝试用更好的算法和默认值来改进长期缓存。
+- 尝试用更好的 Tree Shaking 和代码生成来改善包大小。
+- 尝试改善与网络平台的兼容性。
+- 尝试在不引入任何破坏性变化的情况下，清理那些在实现 v4 功能时处于奇怪状态的内部结构。
+- 试图通过现在引入突破性的变化来为未来的功能做准备，使其能够尽可能长时间地保持在 v5 版本上。
+
 
 ## html
+### 从输⼊url到展示⽹⻚
+1. DNS解析成IP，可以使⽤dns-prefetch在浏览器空闲的时候解析
+2. 发送http请求
+3. 建⽴tcp连接
+4. 传输数据
+5. 解析HTML构建dom树
+6. 解析CSS结合dom树构建render树
+7. 布局render树
+8. 绘制render树
+
+### 浏览器缓存
+相关请求头：Cache-Control、Expires、Etag、If-None-Match、If-Modified-Since、Last-Modified：
+- Cache-Control（http1.1）优先级高于Expires（http1.0）
+- Etag/If-None-Match优先级高于If-Modified-Since/Last-Modified
+
+缓存逻辑：
+1. 第⼀次访问时，向服务器发送请求，成功收到响应，返回200，浏览器下载资源⽂件，并记录下response header和返回时间。
+2. 再次访问相同资源时，本地先判断是否需要发送请求给服务端：
+    - ⽐较当前时间和上⼀次返回200时的时间差（使用Cache-Control或Expires），如果未超过过期时间，则命中强缓存，读取本地缓存资源
+    - 如果过期了，则向服务器发送header带有Etag/If-None-Match或If-Modified-Since/Last-Modified的请求
+3. 服务器收到请求后，根据header内容判断被请求的⽂件有没有做修改，没有修改则命中协商缓存，返回304；有改动则直接返回新的资源⽂件带上新的header并返回200。
+
 ### meta标签
 ## css
-### 上中下布局
+### 盒模型
+- 浏览器渲染时会根据盒模型把元素表示成⼀个个矩形的盒⼦。css决定盒⼦的⼤⼩、位置、属性
+- 每个盒⼦有四部分：content、padding、border、margin
+- box-sizing: content-box（默认）。width、height、min-height、max-height、min-width、max-width控制content区域⼤⼩
+- box-sizing: border-box（ie怪异盒模型）。width、height、min-height、max-height、min-width、max-width控制content+padding+border⼤⼩
+- 如果盒⼦上有背景（background-color或background-image），背景会延伸⾄border外沿，border盖在背景上。可通过background-clip设置，border-box（默认）、padding-box、content-box、text分别设置延伸⾄border、padding、content和text外沿
 ### bfc 块级格式化上下文
+盒模型布局是⽤BFC模式渲染的。浮动，绝对定位元素，inline-blocks, table-cells, table-captions,和overflow的值不为visible的元素，将创建⼀个新的块级格式化上下⽂。
+- BFC内部元素不会伸出盒⼦。⽐如float，margin不撑开⽗元素
+- BFC不会围绕浮动元素
+- BFC内垂直⽅向的距离由较⼤的margin决定，⽽不是margin相加
+通常会使⽤overflow来创建BFC。不引起任何副作⽤可以使⽤display: flow-root。
+### 上中下布局
 ### <link/>为什么要放在头部
