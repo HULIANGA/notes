@@ -13,7 +13,9 @@ JavaScript 是基于原型的语言。
 当获取一个对象的属性时，会先从对象本身寻找，如果没有再到对象的 `__proto__` 寻找，还没有就再到对象的 `__proto__` 的 `__proto__` 寻找，直到 `Object.prototype`。
 
 ## 继承
-### 通过原型链继承
+### 基于原型继承
+[基于原型继承](https://developer.mozilla.org/zh-CN/docs/Learn/JavaScript/Objects/Inheritance#%E5%8E%9F%E5%9E%8B%E5%BC%8F%E7%9A%84%E7%BB%A7%E6%89%BF)
+
 1. 定义一个父类，添加属性和方法
     ``` javascript
     function Person (name, age) {
@@ -59,6 +61,11 @@ JavaScript 是基于原型的语言。
     }
 
     // `Object.create()` 方法创建一个新对象，使用现有的对象来提供新创建的对象的 `__proto__`。通过这个方法来继承
+    // 可以用以下方式代替 `Object.create()`
+    // function F () {}
+    // F.prototype = Person.prototype
+    // Teacher.prototype = new F()
+
     Teacher.prototype = Object.create(Person.prototype)
     Teacher.prototype.constructor = Teacher
 
@@ -69,6 +76,99 @@ JavaScript 是基于原型的语言。
 ### 几种继承的区别
 https://github.com/mqyqingfeng/Blog/issues/16
 
+```js
+function Parent (name) {
+    this.name = name
+}
+Parent.prototype.sayHi = function () {
+    console.log(`Hi, i'm ${this.name}`)
+}
+```
+1. 原型链继承
+    ```js
+    function Child (age) {
+        this.age = age
+    }
+    
+    Child.prototype = new Parent('hh')
+    ```
+    - 重点：让新实例的原型等于父类的实例。
+    - 特点：1、实例可继承的属性有：实例的构造函数的属性，父类构造函数属性，父类原型的属性。（新实例不会继承父类实例的属性！）
+    - 缺点：
+        - 新实例无法向父类构造函数传参。
+        - 继承单一。
+        - 所有新实例都会共享父类实例的属性。（原型上的属性是共享的，一个实例修改了原型属性，另一个实例的原型属性也会被修改！）
+
+2. 构造函数继承
+    ```js
+    function Child (name, age) {
+        Parent.call(this, name)
+        this.age = age
+    }
+    ```
+    - 重点：用.call()和.apply()将父类构造函数引入子类函数（在子类函数中做了父类函数的自执行（复制））
+    - 特点：
+        - 只继承了父类构造函数的属性，没有继承父类原型的属性。
+        - 解决了原型链继承缺点。
+        - 可以继承多个构造函数属性（call多个）。
+        - 在子实例中可向父实例传参。
+    - 缺点：
+        - 只能继承父类构造函数的属性。
+        - 无法实现构造函数的复用。（每次用每次都要重新调用）
+        - 每个新实例都有父类构造函数的副本，臃肿。
+
+3. 组合继承（结合原型链和构造函数继承）
+    ```js
+    function Child (name, age) {
+        Parent.call(this, name)
+        this.age = age
+    }
+
+    Child.prototype = new Parent()
+    ```
+    - 重点：结合了两种模式的优点，传参和复用
+    - 特点：
+        - 可以继承父类原型上的属性，可以传参，可复用。
+        - 每个新实例引入的构造函数属性是私有的。
+    - 缺点：调用了两次父类构造函数（耗内存），子类的构造函数会代替原型上的那个父类构造函数。
+
+4. 原型式继承
+    ```js
+    function content (obj) {
+        function F () {}
+        F.prototype = obj
+        return new F()
+    }
+
+    var child = content(new Parent('aa'))
+    ```
+    - 重点：用一个函数包装一个对象，然后返回这个函数的调用，这个函数就变成了个可以随意增添属性的实例或对象。object.create()就是这个原理。
+    - 特点：类似于复制一个对象，用函数来包装。
+    - 缺点：
+        - 所有实例都会继承原型上的属性。
+        - 无法实现复用。（新实例属性都是后面添加的）
+
+5. 寄生式继承
+    ```js
+    function content (obj) {
+        function F () {}
+        F.prototype = obj
+        return new F()
+    }
+    // 在原型式继承的基础上再套一层用来传参
+    function subObject (obj) {
+        var sub = content(obj)
+        sub.name = 'aaa'
+        return sub
+    }
+
+    var child = subObject(new Person('aa'))
+    ```
+    - 重点：就是给原型式继承外面套了个壳子。
+    - 优点：没有创建自定义类型，因为只是套了个壳子返回对象（这个），这个函数顺理成章就成了创建的新对象。
+    - 缺点：没用到原型，无法复用。
+
+6. 寄生组合式继承。就是前面的基于原型链继承
 ## Class
 
 ## this
@@ -481,8 +581,51 @@ HTTPS （安全的HTTP）是 HTTP 协议的加密版本。它通常使用 SSL (e
 ![image](./https.png)
 
 ## 跨域
+https://developer.mozilla.org/zh-CN/docs/Web/HTTP/CORS
+
+### 产生跨域的情况
+- XMLHttpRequest 或 Fetch APIs 发起的跨源 HTTP 请求。
+- Web 字体 (CSS 中通过 @font-face 使用跨源字体资源)，因此，网站就可以发布 TrueType 字体资源，并只允许已授权网站进行跨站调用。
+- WebGL 贴图
+- 使用 drawImage 将 Images/video 画面绘制到 canvas。
+- [来自图像的 CSS 图形](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Shapes/Shapes_From_Images)
+### 简单请求
+### 预检请求
+
+## 前端性能
+- 尽可能少的请求数量和传输大小
+    - js/css代码压缩；按需使用；小文件合并
+    - 图片压缩；小图片合并精灵图或转base64
+    - 懒加载屏幕外的图片
+    - 开启gzip
+- 提高请求效率
+    - 拆分域名增加浏览器下载的并行数
+    - 设置缓存
+    - 使用cdn
+    - 使用http2
+    - 使用prefetch、preload预加载资源
+- 减少阻塞
+    - 只把需要的css放在head里
+    - js放在末尾防止阻塞，如果放在head里，要加上defer或async
+    - 减少主线程工作
+        - 使用worker
+        - 优化long task
+- 提升平滑度
+    - 使用占位图、骨架屏
+    - 不要频繁操作dom
+    - 动画效果注意页面重排
+        - 用transform: scale()来替代和调整height和width属性。
+        - 用transform: translate()来替代和调整top、right、bottom或left属性
 
 ## 回流重绘
+https://developer.mozilla.org/zh-CN/docs/Glossary/Reflow
+
+http://developers.google.com/web/fundamentals/performance/critical-rendering-path/render-tree-construction?hl=zh-cn
+
+https://gist.github.com/paulirish/5d52fb081b3570c81e3a
+
+https://segmentfault.com/a/1190000017329980
+
 
 ## canvas
 
@@ -490,6 +633,9 @@ HTTPS （安全的HTTP）是 HTTP 协议的加密版本。它通常使用 SSL (e
 ## vue
 ### MVVM如何实现
 ### 双向绑定原理
+https://www.cnblogs.com/canfoo/p/6891868.html
+
+通过数据劫持结合发布订阅模式的方式来实现。
 ### 组合式api实现原理
 ### vue3 对比 vue2
 - 组合式API
@@ -541,6 +687,7 @@ https://webpack.docschina.org/blog/2020-10-10-webpack-5-release/
 
 ## html
 ### 从输⼊url到展示⽹⻚
+https://developer.mozilla.org/zh-CN/docs/Web/Performance/How_browsers_work  
 1. DNS解析成IP，可以使⽤dns-prefetch在浏览器空闲的时候解析
 2. 发送http请求
 3. 建⽴tcp连接
@@ -578,3 +725,8 @@ https://webpack.docschina.org/blog/2020-10-10-webpack-5-release/
 通常会使⽤overflow来创建BFC。不引起任何副作⽤可以使⽤display: flow-root。
 ### 上中下布局
 ### <link/>为什么要放在头部
+
+
+## typescript
+
+## 

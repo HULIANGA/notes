@@ -141,27 +141,53 @@
 // }, 100)
 
 
-function Person (name, age) {
+// function Person (name, age) {
+//     this.name = name
+//     this.age = age
+// }
+// Person.prototype.sayHi = function () {
+//     console.log(`Hi, i'm ${this.name}.`)
+// }
+
+// function Teacher (name, age, subject) {
+//     Person.call(this, name, age)
+
+//     this.subject = subject
+// }
+
+// // `Object.create()` 方法创建一个新对象，使用现有的对象来提供新创建的对象的 `__proto__`。通过这个方法来继承
+// Teacher.prototype = Object.create(Person.prototype)
+// Teacher.prototype.constructor = Teacher
+// Person.prototype.sayHi = function () {
+//     console.log(`Hi, i'm ${this.name}, i'm ${this.subject} teacher.`)
+// }
+
+// var teacher1 = new Teacher('huliang', 28, 'code')
+
+// console.log(teacher1)
+
+
+function Parent (name) {
     this.name = name
+}
+Parent.prototype.sayHi = function () {
+    console.log(`Hi, i'm ${this.name}`)
+}
+
+function Child (age) {
     this.age = age
 }
-Person.prototype.sayHi = function () {
-    console.log(`Hi, i'm ${this.name}.`)
-}
 
-function Teacher (name, age, subject) {
-    Person.call(this, name, age)
+Child.prototype = new Parent('hh')
 
-    this.subject = subject
-}
+var a = new Child(12)
+var b = new Child(24)
 
-// `Object.create()` 方法创建一个新对象，使用现有的对象来提供新创建的对象的 `__proto__`。通过这个方法来继承
-Teacher.prototype = Object.create(Person.prototype)
-Teacher.prototype.constructor = Teacher
-Person.prototype.sayHi = function () {
-    console.log(`Hi, i'm ${this.name}, i'm ${this.subject} teacher.`)
-}
-
-var teacher1 = new Teacher('huliang', 28, 'code')
-
-console.log(teacher1)
+console.log(a.name)
+console.log(a.age)
+a.sayHi()
+console.log(b.name)
+console.log(b.age)
+a.__proto__.name = 'abc'
+console.log(a.name)
+console.log(b.name)
